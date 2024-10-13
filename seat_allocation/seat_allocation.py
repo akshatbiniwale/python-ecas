@@ -1,11 +1,9 @@
-from flask import Flask, request, send_file, render_template
 import pandas as pd
 import random
 import math
 import csv
 from io import StringIO, BytesIO
-
-app = Flask(__name__)
+import os
 
 # Initial configuration (random assignment)
 def random_assignment(students):
@@ -59,28 +57,16 @@ def simulated_annealing(students, courses, initial_temp=1000, cooling_rate=0.99,
 
     return best_solution, best_cost
 
-# Route to serve the HTML form
-@app.route('/')
-def index():
-    return render_template('index.html')
+def seat_allocation_algorithm(filename, courses, students):
 
-# API route to handle the seat assignment process
-@app.route('/assign-seats', methods=['POST'])
-def assign_seats():
-    # Load the input CSV
-    file = request.files['file']
-    df = pd.read_csv(file)
-
-    students = df['UID'].tolist()
-    courses = df['Course'].tolist()
     rooms = ['609', '601', '701', '605', '603']  # Define rooms
 
     # Run simulated annealing algorithm
     best_assignment, best_conflicts = simulated_annealing(students, courses)
-
     # Prepare the CSV output using StringIO first
-    output_string = StringIO()  # Use StringIO for text output
-    writer = csv.writer(output_string)
+    # output_string = StringIO()  # Use StringIO for text output
+    FILE = open(f"seat-{filename}.csv", 'w')
+    writer = csv.writer(FILE)
 
     writer.writerow(['Seat', 'UID', 'Course', 'Room'])
 
@@ -94,13 +80,13 @@ def assign_seats():
             current_capacity = 0
         current_capacity += 1
         writer.writerow([((seat) % limit) + 1, students[student_idx], courses[student_idx], rooms[current_room]])
-
+    FILE.close()
+    return
     # Now convert the StringIO output to bytes
-    output_string.seek(0)  # Move to the beginning of the StringIO stream
-    output_bytes = BytesIO(output_string.getvalue().encode('utf-8'))  # Convert to bytes
+    # output_string.seek(0)  # Move to the beginning of the StringIO stream
+    # output_bytes = BytesIO(output_string.getvalue().encode('utf-8'))  # Convert to bytes
 
-    # Return the CSV file as a response
-    return send_file(output_bytes, mimetype='text/csv', as_attachment=True, download_name='seat_assignment.csv')
+    # # Return the CSV file as a response
+    # return send_file(output_bytes, mimetype='text/csv', as_attachment=True, download_name='seat_assignment.csv')
 
-if __name__ == '__main__':
-    app.run(debug=True)
+
