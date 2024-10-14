@@ -3,7 +3,7 @@ from flask import Flask, request, jsonify, send_file, render_template
 import logging
 from services.services import saveCsv
 import pandas as pd
-
+import json
 
 from time_table_gen.timetable_algorithm import timetable_algorithm
 from seat_allocation.seat_allocation import seat_allocation_algorithm
@@ -31,8 +31,11 @@ def generate_timetable():
     """
     try:
         #Saving uploaded csv locally
+        startDate = request.form['startDate']
+        startTime = request.form['startTime']
+        rooms = json.loads(request.form['rooms'])
         file = saveCsv(request.files['file'])
-        timetable_algorithm(file.filename)
+        timetable_algorithm(file.filename, startDate, startTime)
 
         students = pd.read_csv("./uploads/"+file.filename)
         students.set_index("uid", inplace=True)
@@ -64,7 +67,7 @@ def generate_timetable():
                 course_name = timetable.loc[date][col]
                 course_list = course_list + [course_name]*len(courses[course_name])
                 student_list = student_list + courses[course_name]
-            seat_allocation_algorithm(date.split(" ")[0], course_list, student_list) 
+            seat_allocation_algorithm(date.split(" ")[0], course_list, student_list, rooms) 
 
 
         return jsonify({

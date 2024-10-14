@@ -57,9 +57,7 @@ def simulated_annealing(students, courses, initial_temp=1000, cooling_rate=0.99,
 
     return best_solution, best_cost
 
-def seat_allocation_algorithm(filename, courses, students):
-
-    rooms = ['609', '601', '701', '605', '603']  # Define rooms
+def seat_allocation_algorithm(filename, courses, students, rooms):
 
     # Run simulated annealing algorithm
     best_assignment, best_conflicts = simulated_annealing(students, courses)
