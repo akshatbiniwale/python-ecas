@@ -6,7 +6,7 @@ from datetime import datetime
 import itertools
 import os
 
-def timetable_algorithm(FILENAME):
+def timetable_algorithm(FILENAME, startDate, startTime):
     FILEPATH = os.path.join(os.getcwd(), 'uploads', FILENAME)
 
     student_data = pd.read_csv(FILEPATH)
@@ -62,10 +62,13 @@ def timetable_algorithm(FILENAME):
     greedy_coloring_algorithm(class_network, colors, colors_used)
     max_rows = len(colors_used)
 
+    start_year, start_month, start_day = map(int, startDate.split("-"))
+    startHour, startMinute = map(int, startTime.split(":"))
+
     dates = []
     calendar = {}
     for i in range(0, max_rows):
-        date = datetime(2024, 5, i+1, 11, 0)
+        date = datetime(start_year, start_month, start_day+i, startHour, startMinute)
         dates.append(date)
         calendar[date] = []
 
@@ -78,26 +81,8 @@ def timetable_algorithm(FILENAME):
         if color in from_color_to_date:
             calendar[from_color_to_date[color]].append(v)
 
-    # Ensure that rooms do not exceed the specified number
-    # rooms = ["Room " + str(i) for i in range(num_rooms)]
-    
-    # Create a DataFrame to hold the timetable
-    # if len(calendar) > 0:
-    #     max_exams = len(max(list(calendar.values()), key=len))
-    #     df = pd.DataFrame.from_dict(calendar, orient='index', columns=rooms[:max_exams])
-    # else:
-    #     df = pd.DataFrame(columns=rooms)
-
     df = pd.DataFrame.from_dict(calendar, orient="index")
     # Save to CSV
     timetable_csv_path = os.path.join(os.getcwd(), "uploads", "timetable.csv")
     df.to_csv(timetable_csv_path)
     return
-    # # Generate class network image
-    # plt.figure(figsize=(10, 8))
-    # pos = nx.spring_layout(class_network)
-    # nx.draw(class_network, pos, with_labels=True, node_color=[data['color'] for _, data in class_network.nodes(data=True)])
-    # plt.title('Class Network Graph')
-    # graph_image_path = 'class_network.png'
-    # plt.savefig(graph_image_path)
-    # plt.close()
